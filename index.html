@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>CyberXCodeR - Base64 Tool</title>
+  <style>
+    body {
+      margin: 0;
+      background-color: black;
+      background-image: url("cyberx1.jpg");
+      background-size: cover;
+      animation: zoomEffect 10s infinite;
+      color: #00FF00;
+      font-family: "Courier New", Courier, monospace;
+      text-align: center;
+      padding: 20px;
+    }
+
+    #mainContent {
+      display: none;
+    }
+
+    h1 {
+      font-size: 2.5em;
+      animation: flicker 1.5s infinite alternate;
+    }
+
+    textarea {
+      width: 90%;
+      min-height: 150px;
+      resize: vertical;
+      background-color: #111;
+      color: #00FF00;
+      border: 1px solid #00FF00;
+      margin-top: 10px;
+      font-size: 1em;
+      padding: 10px;
+    }
+
+    button {
+      background-color: #00FF00;
+      color: black;
+      border: 3px solid #00FF00;
+      padding: 10px 20px;
+      margin: 10px 5px;
+      font-size: 1em;
+      cursor: pointer;
+      transition: background-color 0.3s, border-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #00cc00;
+      border-color: #004d00;
+    }
+
+    footer {
+      position: absolute;
+      bottom: 10px;
+      width: 100%;
+      text-align: center;
+      font-size: 1.2em;
+      color: #00aa00;
+    }
+
+    @keyframes flicker {
+      from { opacity: 1; }
+      to { opacity: 0.7; }
+    }
+
+    #loginScreen {
+      margin-top: 100px;
+    }
+
+    input[type="password"] {
+      padding: 10px;
+      font-size: 1em;
+      width: 200px;
+      background-color: #111;
+      color: #00FF00;
+      border: 1px solid #00FF00;
+    }
+
+    #infoText {
+      font-size: 1em;
+      color: #00FF00;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    #infoModal {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: rgba(0, 0, 0, 0.8);
+      color: #00FF00;
+      padding: 20px;
+      border-radius: 10px;
+      width: 80%;
+      max-width: 600px;
+    }
+
+    #closeModal {
+      background-color: #ff0000;
+      color: #fff;
+      border: none;
+      padding: 5px 10px;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Dil Seçici -->
+<div id="langSelector" style="position: fixed; top: 10px; right: 10px; z-index: 999;">
+  <button id="currentLangBtn" onclick="toggleLangMenu()" style="background-color: black; color: #00FF00; border: 1px solid #00FF00; padding: 5px 10px; cursor: pointer;">TM</button>
+  <div id="langMenu" style="display: none; background-color: black; border: 1px solid #00FF00; position: absolute; right: 0; top: 35px;">
+    <div onclick="setLanguage('tm')" style="padding: 5px 10px; cursor: pointer;">TM</div>
+    <div onclick="setLanguage('en')" style="padding: 5px 10px; cursor: pointer;">ENG</div>
+    <div onclick="setLanguage('ru')" style="padding: 5px 10px; cursor: pointer;">Рус</div>
+    <div onclick="setLanguage('tr')" style="padding: 5px 10px; cursor: pointer;">Türk</div>
+  </div>
+</div>
+
+<!-- Offline Sound Effects -->
+<audio id="clickSound" preload="auto">
+  <source src="click.mp3" type="audio/mpeg">
+</audio>
+
+<div id="loginScreen">
+  <h1 data-lang-tm="CyberXCodeR" data-lang-en="CyberXCodeR" data-lang-ru="КиберXКодер" data-lang-tr="CyberXKodlayıcı">CyberXCodeR</h1>
+  <p data-lang-tm="Giriş parolyny ýazyň:" data-lang-en="Enter the password:" data-lang-ru="Введите пароль:" data-lang-tr="Parolyi girin:">Giriş parolyny ýazyň:</p>
+  <input type="password" id="passwordInput" placeholder="Parol..." onkeydown="checkEnter(event)"><br><br>
+  <button onclick="checkPassword()" data-lang-tm="Giriş" data-lang-en="Login" data-lang-ru="Войти" data-lang-tr="Giriş">Giriş</button>
+
+  <p id="infoText" data-lang-tm="Sahypanyň maksady we amaly" data-lang-en="Purpose and function of the page" data-lang-ru="Цель и функциональность страницы" data-lang-tr="Sayfanın amacı ve işlevi">Sahypanyň maksady we amaly</p>
+</div>
+
+<div id="infoModal">
+  <p data-lang-tm="CyberXCodeR, Base64 kodlamagy we dekodlamagy üpjün edýän bir guraldyr. Bu guralyň esasy maksady, internetli ýa-da intrnetsiz her dürli maglumatlary ygtybarly geçirmek,saklamak,kodlamak we deşifrlemek üçin giňden ulanylýar. Siz bu gurallary ofline we online 2 ýagdaýda hem ulanyp bilersiňiz. 1.Giriş ekrany: Parol bilen girilýän ýörite sahypa. Paroly dogry girseňiz 'cyberx', esasy sahypa geçiş edýärsiňiz. 2.Base64 kodlaýjy we dekodlaýjy: Şeýlelik bilen, her dürli maglumatlary (meselem, tekstleri) Base64 formatyna kodlap, soňra ony yzyna dekodlap bilersiňiz. 3.Sahypa ýokarsynda we aşagynda degişli tutuş görnüşde maglumatlar görkezilen. 4.Maglumatlary faýllarda ýatda saklamak: Kody faýla çykaryp, şu görnüşlerde (txt, html, json we ş.m.) saklap bilersiňiz."
+     data-lang-en="CyberXCodeR is a tool that provides Base64 encoding and decoding. The main goal of this tool is to securely transmit, store, encode, and decode various types of data with or without internet. You can use these tools both online and offline. 1. Login screen: A special page protected by a password. If you enter the correct password 'cyberx', you are redirected to the main page. 2. Base64 encoder and decoder: You can encode any kind of data (e.g. text) into Base64 format and then decode it back. 3. The page displays full structured information at the top and bottom. 4. Saving data in files: You can export the code to a file and save it in formats like txt, html, json, etc."
+     data-lang-ru="CyberXCodeR — это инструмент для кодирования и декодирования Base64. Основная цель — безопасно передавать, сохранять, кодировать и декодировать различные данные с интернетом или без него. Вы можете использовать этот инструмент как онлайн, так и оффлайн. 1. Экран входа: Специальная страница, защищённая паролем. При правильном вводе пароля 'cyberx' происходит переход на главную страницу. 2. Кодировщик и декодировщик Base64: Можно кодировать любые данные (например, текст) в формат Base64 и обратно. 3. В верхней и нижней частях страницы отображается полная информация. 4. Сохранение данных в файлы: Код можно экспортировать и сохранить в форматах txt, html, json и т.д."
+data-lang-tr="CyberXCodeR, Base64 kodlama ve kod çözme işlemlerini sağlayan bir araçtır. Bu aracın temel amacı, internetli veya internetsiz çeşitli verileri güvenli şekilde aktarmak, depolamak, kodlamak ve çözmektir. Bu araçları hem çevrimiçi hem de çevrimdışı kullanabilirsiniz. 1. Giriş ekranı: Parolayla korunan özel bir sayfa. Doğru parola 'cyberx' girildiğinde ana sayfaya yönlendirilirsiniz. 2. Base64 kodlayıcı ve çözücü: Her türlü veriyi (örneğin metin) Base64 formatına kodlayabilir ve tekrar çözebilirsiniz. 3. Sayfanın üst ve alt kısmında tüm bilgiler düzenli şekilde gösterilir. 4. Verileri dosyalarda saklama: Kodu dosya olarak dışa aktarabilir ve txt, html, json vb. formatlarda kaydedebilirsiniz.">CyberXCodeR, Base64 kodlamagy we dekodlamagy üpjün edýän bir guraldyr...</p>
+  <button id="closeModal" onclick="closeModal()" data-lang-tm="Ýap" data-lang-en="Close" data-lang-ru="Закрыть" data-lang-tr="Kapat">Ýap</button>
+</div>
+
+<div id="mainContent">
+  <h1>CyberXCodeR</h1>
+  <p data-lang-tm="Offline Base64 Kodlaýjy / Dekodlaýjy gural" data-lang-en="Offline Base64 Encoder / Decoder Tool" data-lang-ru="Оффлайн Base64 кодировщик / декодировщик" data-lang-tr="Çevrimdışı Base64 Kodlayıcı / Kod Çözücü Araç">Offline Base64 Kodlaýjy / Dekodlaýjy gural</p>
+
+  <textarea id="inputText" 
+  placeholder="Enter text...Tekst giriziň..."></textarea><br>
+  <button onclick="playSound(); encodeText()" data-lang-tm="Kodla" data-lang-en="Encode" data-lang-ru="Кодировать" data-lang-tr="Kodla">Kodla</button>
+  <button onclick="playSound(); decodeText()" data-lang-tm="Dekodla" data-lang-en="Decode" data-lang-ru="Декодировать" data-lang-tr="Çöz">Dekodla</button>
+  <button onclick="clearInput()" data-lang-tm="Arassala" data-lang-en="Clear" data-lang-ru="Очистить" data-lang-tr="Temizle">Arassala</button>
+
+  <textarea id="outputText" 
+  placeholder="The result will appear here...Netije şu ýerde görkeziler..."></textarea><br>
+  <button onclick="clearOutput()" data-lang-tm="Arassala" data-lang-en="Clear" data-lang-ru="Очистить" data-lang-tr="Temizle">Arassala</button>
+  <button onclick="downloadOutput()" data-lang-tm="Ýatda sakla" data-lang-en="Save" data-lang-ru="Сохранить" data-lang-tr="Kaydet">Ýatda sakla</button>
+
+ <footer 
+  data-lang-tm="Dörediji: Amanmädow Şageldi | Wersiýasy: 1.2 | Base64"
+  data-lang-en="Developer: Amanmadow Shageldi | Version: 1.2 | Base64"
+  data-lang-ru="Разработчик: Аманмадов Шагельды | Версия: 1.2 | Base64"
+  data-lang-tr="Geliştirici: Amanmädow Şageldi | Sürüm: 1.2 | Base64"
+  Dörediji: Amanmädow Şageldi | Wersiýasy: 1.2 | Offline Gural
+</footer>
+</div>
+
+<script>
+  const correctPassword = "cyberx";
+
+  function checkPassword() {
+    let input = document.getElementById('passwordInput').value;
+    if (input === correctPassword) {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('mainContent').style.display = 'block';
+    } else {
+      alert("Parol ýalňyş!");
+    }
+  }
+
+  function playSound() {
+    const clickSound = document.getElementById("clickSound");
+    clickSound.currentTime = 0;
+    clickSound.play();
+  }
+
+  function encodeText() {
+    let input = document.getElementById('inputText').value;
+    let encoded = btoa(input);
+    document.getElementById('outputText').value = encoded;
+  }
+
+  function decodeText() {
+    let input = document.getElementById('inputText').value;
+    try {
+      let decoded = atob(input);
+      document.getElementById('outputText').value = decoded;
+    } catch (e) {
+      document.getElementById('outputText').value = "Decode ýalňyşlygy!";
+    }
+  }
+
+  function clearInput() {
+    document.getElementById('inputText').value = "";
+  }
+
+  function clearOutput() {
+    document.getElementById('outputText').value = "";
+  }
+
+  function downloadOutput() {
+    const content = document.getElementById("outputText").value;
+
+    let fileName = prompt("Faýlyň adyny giriziň:", "cyberx_output");
+    if (!fileName) return;
+
+    let format = prompt("Faýlyň görnüşini saýlaň: txt, html, json, csv, xml, md", "txt");
+    format = format.toLowerCase();
+
+    if (!["txt", "html", "json", "csv", "xml", "md"].includes(format)) {
+      alert("Nädogry görnüş!");
+      return;
+    }
+
+    const blob = new Blob([content], { type: "text/" + format });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = fileName + "." + format;
+    link.click();
+  }
+
+  function checkEnter(event) {
+    if (event.key === "Enter") {
+      checkPassword();
+    }
+  }
+
+  document.getElementById('infoText').onclick = function() {
+    document.getElementById('infoModal').style.display = 'block';
+  }
+
+  function closeModal() {
+    document.getElementById('infoModal').style.display = 'none';
+  }
+
+  // Dil sistemi
+  let currentLang = "tm";
+
+  function toggleLangMenu() {
+    const menu = document.getElementById("langMenu");
+    menu.style.display = menu.style.display === "block" ? "none" : "block";
+  }
+
+  function setLanguage(lang) {
+    currentLang = lang;
+    document.getElementById("langMenu").style.display = "none";
+    document.getElementById("currentLangBtn").textContent = getLangShortName(lang);
+    applyLanguage(lang);
+  }
+
+  function getLangShortName(lang) {
+    switch (lang) {
+      case "tm": return "TM";
+      case "en": return "ENG";
+      case "ru": return "Рус";
+      case "tr": return "Türk";
+      default: return lang.toUpperCase();
+    }
+  }
+
+  function applyLanguage(lang) {
+    const elements = document.querySelectorAll('[data-lang-' + lang + ']');
+    elements.forEach(el => {
+      el.textContent = el.getAttribute('data-lang-' + lang);
+    });
+  }
+
+  window.onload = function () {
+    setLanguage(currentLang);
+  }
+</script>
+
+</body>
+</html>
